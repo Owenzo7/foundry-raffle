@@ -24,18 +24,29 @@
 
 pragma solidity ^0.8.17;
 
-/**@title A sample Raffle Contract
+/**
+ * @title A sample Raffle Contract
  * @author Owen Lee
  * @notice This contract is for creating a sample raffle contract
  * @dev This implements the Chainlink VRF Version 2
  */
 contract Raffle {
     error Raffle__NotEnoughEthSent();
+
     uint256 private immutable i_entranceFee;
+    // duration of the lottery in seconds
+    uint256 private immutable i_interval;
+    uint256 private s_lastTimeStamp;
     address payable[] private s_players;
 
-    constructor(uint256 entranceFee) {
+    // Events
+
+    event EnteredRaffle(address indexed player);
+
+    constructor(uint256 entranceFee, uint256 interval) {
         i_entranceFee = entranceFee;
+        i_interval = interval;
+        s_lastTimeStamp = block.timestamp;
     }
 
     function enterRaffle() external payable {
@@ -44,9 +55,19 @@ contract Raffle {
         }
 
         s_players.push(payable(msg.sender));
+
+        emit EnteredRaffle(msg.sender);
     }
 
-    function pickWinner() public {}
+    // 1. Get a random number
+    // 2. Use the random number to pick a player
+    // 3. Be automatically called
+    function pickWinner() external {
+        // check to see if enough time has passed
+        if (block.timestamp - s_lastTimeStamp < i_interval) {
+            revert();
+        }
+    }
 
     // Getter functions
 
