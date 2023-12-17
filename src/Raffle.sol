@@ -30,23 +30,45 @@ pragma solidity ^0.8.17;
  * @notice This contract is for creating a sample raffle contract
  * @dev This implements the Chainlink VRF Version 2
  */
-contract Raffle {
+
+import {VRFCoordinatorV2Interface} from "@chainlink/contracts/src/v0.8/interfaces/VRFCoordinatorV2Interface.sol";
+import {VRFConsumerBaseV2} from "@chainlink/contracts/src/v0.8/VRFConsumerBaseV2.sol";
+
+contract Raffle is VRFConsumerBaseV2 {
     error Raffle__NotEnoughEthSent();
+
+    uint16 private constant REQUEST_CONFIRMATIONS = 3;
+    uint32 private constant NUM_WORDS = 1;
 
     uint256 private immutable i_entranceFee;
     // duration of the lottery in seconds
     uint256 private immutable i_interval;
     uint256 private s_lastTimeStamp;
+    VRFCoordinatorV2Interface private immutable i_vrfCoordinator;
     address payable[] private s_players;
+    bytes32 private immutable i_gaslane;
+    uint64 private immutable i_subscriptionId;
+    uint32 private immutable i_callbackGasLimit;
 
     // Events
 
     event EnteredRaffle(address indexed player);
 
-    constructor(uint256 entranceFee, uint256 interval) {
+    constructor(
+        uint256 entranceFee,
+        uint256 interval,
+        address vrfCoordinator,
+        bytes32 gasLane,
+        uint64 subscriptionId,
+        uint32 callbackGasLimit
+    ) VRFConsumerBaseV2(vrfCoordinator) {
         i_entranceFee = entranceFee;
         i_interval = interval;
+        i_vrfCoordinator = VRFCoordinatorV2Interface(vrfCoordinator);
+        i_subscriptionId = subscriptionId;
+        i_callbackGasLimit = callbackGasLimit;
         s_lastTimeStamp = block.timestamp;
+        i_gaslane = gasLane;
     }
 
     function enterRaffle() external payable {
@@ -67,7 +89,23 @@ contract Raffle {
         if (block.timestamp - s_lastTimeStamp < i_interval) {
             revert();
         }
+
+        // 1. Request the RNG
+        // 2. Get the random number
+
+        uint256 requestId = i_vrfCoordinator.requestRandomWords(
+            i_gaslane, // gas lane
+            i_subscriptionId,
+            REQUEST_CONFIRMATIONS,
+            i_callbackGasLimit,
+            NUM_WORDS
+        );
     }
+
+    function fulfillRandomWords(
+        uint256 requestId,
+        uint256[] memory randomWords
+    ) internal override {}
 
     // Getter functions
 
