@@ -9,7 +9,7 @@ import {HelperConfig} from "../script/HelperConfig.s.sol";
 contract DeployRaffle is Script {
     Raffle raffle;
 
-    function run() external returns (Raffle) {
+    function run() external returns (Raffle, HelperConfig) {
         HelperConfig helperconfig = new HelperConfig();
 
         (
@@ -33,6 +33,6 @@ contract DeployRaffle is Script {
 
         vm.stopBroadcast();
 
-        return raffle;
+        return (raffle, helperconfig);
     }
 }
