@@ -22,14 +22,7 @@ contract DeployRaffle is Script {
         ) = helperconfig.activeNetworkConfig();
 
         vm.startBroadcast();
-        raffle = new Raffle(
-            entranceFee,
-            interval,
-            vrfCoordinator,
-            gasLane,
-            subscriptionId,
-            callbackGasLimit
-        );
+        raffle = new Raffle(entranceFee, interval, vrfCoordinator, gasLane, subscriptionId, callbackGasLimit);
 
         vm.stopBroadcast();
 
