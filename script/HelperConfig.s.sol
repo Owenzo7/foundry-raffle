@@ -54,6 +54,8 @@ contract HelperConfig is Script {
             baseFee,
             gasPriceLink
         );
+
+        LinkToken link = new LinkToken();
         vm.stopBroadcast();
 
         return
@@ -63,7 +65,8 @@ contract HelperConfig is Script {
                 vrfCoordinator: address(vrfcoordinatorMock),
                 gasLane: 0x474e34a077df58807dbe9c96d3c009b23b3c6d0cce433e59bbf5b34f823bc56c,
                 subscriptionId: 0, // Our script will add this
-                callbackGasLimit: 500000 // 500,000 gas
+                callbackGasLimit: 500000, // 500,000 gas
+                link: address(link)
             });
     }
 }
