@@ -27,37 +27,20 @@ contract DeployRaffle is Script {
             // we are going to need to create a subscription!
             CreateSubscription createSubscription = new CreateSubscription();
 
-            subscriptionId = createSubscription.createSubscription(
-                vrfCoordinator
-            );
+            subscriptionId = createSubscription.createSubscription(vrfCoordinator);
 
             // Fund it!
             FundSubscription fundSubscription = new FundSubscription();
-            fundSubscription.fundSubscription(
-                vrfCoordinator,
-                subscriptionId,
-                link
-            );
+            fundSubscription.fundSubscription(vrfCoordinator, subscriptionId, link);
         }
 
         vm.startBroadcast();
-        raffle = new Raffle(
-            entranceFee,
-            interval,
-            vrfCoordinator,
-            gasLane,
-            subscriptionId,
-            callbackGasLimit
-        );
+        raffle = new Raffle(entranceFee, interval, vrfCoordinator, gasLane, subscriptionId, callbackGasLimit);
 
         vm.stopBroadcast();
 
         AddConsumer addconsumer = new AddConsumer();
-        addconsumer.addConsumer(
-            address(raffle),
-            vrfCoordinator,
-            subscriptionId
-        );
+        addconsumer.addConsumer(address(raffle), vrfCoordinator, subscriptionId);
 
         return (raffle, helperconfig);
     }
