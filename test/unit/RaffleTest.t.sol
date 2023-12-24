@@ -29,8 +29,15 @@ contract RaffleTest is Test {
         deployer = new DeployRaffle();
         (raffle, helperConfig) = deployer.run();
 
-        (entranceFee, interval, vrfCoordinator, gasLane, subscriptionId, callbackGasLimit, link) =
-            helperConfig.activeNetworkConfig();
+        (
+            entranceFee,
+            interval,
+            vrfCoordinator,
+            gasLane,
+            subscriptionId,
+            callbackGasLimit,
+            link
+        ) = helperConfig.activeNetworkConfig();
 
         vm.deal(PLAYER, STARTING_USER_BALANCE);
     }
@@ -79,5 +86,36 @@ contract RaffleTest is Test {
         vm.expectRevert(Raffle.Raffle_RaffleNotOpen.selector);
         vm.prank(PLAYER);
         raffle.enterRaffle{value: entranceFee}();
+    }
+
+    /////////////////////
+    // CheckUpkeep
+    ////////////////////
+
+    function testCheckUpkeepReturnsFalseIfItHasNoBalance() public {
+        // Arrange
+        vm.warp(block.timestamp + interval + 1);
+        vm.roll(block.number + 1);
+
+        // Act
+        (bool upKeepNeeded, ) = raffle.checkUpkeep("");
+
+        // Assert
+        assert(!upKeepNeeded);
+    }
+
+    function testCheckUpkeepReturnsFalseIfRaffleNotOpen() public {
+        // Arrange
+        vm.prank(PLAYER);
+        raffle.enterRaffle{value: entranceFee}();
+        vm.warp(block.timestamp + interval + 1);
+        vm.roll(block.number + 1);
+        raffle.performUpkeep("");
+
+        // Act
+        (bool upKeepNeeded, ) = raffle.checkUpkeep("");
+
+        // Assert
+        assert(upKeepNeeded == false);
     }
 }
